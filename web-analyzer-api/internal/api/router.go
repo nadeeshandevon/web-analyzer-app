@@ -1,6 +1,7 @@
 package api
 
 import (
+	"web-analyzer-api/internal/api/middleware"
 	"web-analyzer-api/internal/di"
 	"web-analyzer-api/internal/logger"
 
@@ -8,6 +9,7 @@ import (
 )
 
 func SetupRouter(router *gin.Engine, handlers di.HTTPHandlers, logger *logger.Logger) error {
+	router.Use(middleware.ErrorHandler(*logger))
 	router.Use(gin.Recovery())
 
 	v1 := router.Group("/api/v1")
