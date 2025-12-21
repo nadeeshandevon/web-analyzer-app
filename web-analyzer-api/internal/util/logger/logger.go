@@ -33,6 +33,6 @@ func parseLogLevel(level string) slog.Level {
 	case "error":
 		return slog.LevelError
 	default:
-		return slog.LevelInfo // safe default
+		return slog.LevelInfo
 	}
 }

@@ -2,7 +2,9 @@ package di
 
 import (
 	v1 "web-analyzer-api/internal/api/v1"
-	"web-analyzer-api/internal/logger"
+	webanalyzer "web-analyzer-api/internal/core/web_analyzer"
+	"web-analyzer-api/internal/repositorysql"
+	"web-analyzer-api/internal/util/logger"
 )
 
 type HTTPHandlers struct {
@@ -10,11 +12,13 @@ type HTTPHandlers struct {
 }
 
 type Container struct {
-	HTTPHandlers HTTPHandlers // All HTTP request handlers
+	HTTPHandlers HTTPHandlers
 }
 
 func NewContainer(logger *logger.Logger) *Container {
-	webAnalyzerHandler := v1.NewWebAnalyzerHandler(logger)
+	webAnalyzerRepo := repositorysql.NewWebAnalyzerRepo(logger)
+	webAnalyzerService := webanalyzer.NewWebAnalyzerService(logger, webAnalyzerRepo)
+	webAnalyzerHandler := v1.NewWebAnalyzerHandler(logger, webAnalyzerService)
 
 	logger.Info("Dependency injection container initialized successfully")
 

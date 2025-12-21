@@ -11,7 +11,7 @@ import (
 
 	"web-analyzer-api/internal/api"
 	"web-analyzer-api/internal/di"
-	"web-analyzer-api/internal/logger"
+	"web-analyzer-api/internal/util/logger"
 
 	"github.com/gin-gonic/gin"
 )

@@ -2,36 +2,69 @@ package v1
 
 import (
 	"encoding/json"
+	"net/http"
 	"net/url"
+	"web-analyzer-api/internal/core"
 	"web-analyzer-api/internal/core/apperror"
-	"web-analyzer-api/internal/logger"
 	"web-analyzer-api/internal/util"
+	"web-analyzer-api/internal/util/logger"
 	"web-analyzer-api/pkg/contract"
 
 	"github.com/gin-gonic/gin"
 )
 
 type WebAnalyzerHandler struct {
-	log *logger.Logger // Logger for logging messages
+	log                *logger.Logger
+	webAnalyzerService core.WebAnalyzerService
 }
 
-func NewWebAnalyzerHandler(logger *logger.Logger) *WebAnalyzerHandler {
+func NewWebAnalyzerHandler(logger *logger.Logger, webAnalyzerService core.WebAnalyzerService) *WebAnalyzerHandler {
 	return &WebAnalyzerHandler{
-		log: logger,
+		log:                logger,
+		webAnalyzerService: webAnalyzerService,
 	}
 }
 
 func (h WebAnalyzerHandler) RegisterRoutes(v1 *gin.RouterGroup) {
 
 	v1.POST("/web-analyzer/analyze",
-		h.analyzeWebPage)
+		h.analyzeWebsite)
+
+	v1.GET("/web-analyzer/:analyze_id/analyze",
+		h.getAnalyzeData)
 }
 
-func (h WebAnalyzerHandler) analyzeWebPage(c *gin.Context) {
+func (h WebAnalyzerHandler) analyzeWebsite(c *gin.Context) {
 	var req contract.WebAnalyzeRequest
 	if !h.validateRequest(c, &req) {
 		return
 	}
+
+	result, err := h.webAnalyzerService.AnalyzeWebsite(c.Request.Context(), req.URL)
+
+	if err != nil {
+		util.SetRequestError(c, err, h.log)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"analyze_id": result})
+}
+
+func (h WebAnalyzerHandler) getAnalyzeData(c *gin.Context) {
+	analyzeId := c.Param("analyze_id")
+	if analyzeId == "" {
+		util.SetRequestError(c, apperror.BadRequest("analyze_id is required"), h.log)
+		return
+	}
+
+	result, err := h.webAnalyzerService.GetAnalyzeData(c.Request.Context(), analyzeId)
+
+	if err != nil {
+		util.SetRequestError(c, err, h.log)
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
 }
 
 func (h *WebAnalyzerHandler) validateRequest(c *gin.Context, req *contract.WebAnalyzeRequest) bool {

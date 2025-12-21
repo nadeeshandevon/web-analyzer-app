@@ -25,6 +25,14 @@ func BadRequest(message string) *AppError {
 	return categorizedError(message, http.StatusBadRequest, CategoryValidation)
 }
 
+func InternalServerError(message string) *AppError {
+	return categorizedError(message, http.StatusInternalServerError, CategoryInternal)
+}
+
+func NotFound(message string) *AppError {
+	return categorizedError(message, http.StatusNotFound, CategoryValidation)
+}
+
 func (e *AppError) Error() string {
 	result := fmt.Sprintf("status code: %d, message: %s", e.StatusCode, e.Message)
 	if e.ChainedError != nil {
