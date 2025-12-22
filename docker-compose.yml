@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  web-analyzer-api:
+    build:
+      context: ./web-analyzer-api
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      - LOG_LEVEL=info
+
+  web-analyzer-web:
+    build:
+      context: ./web-analyzer-web
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - web-analyzer-api

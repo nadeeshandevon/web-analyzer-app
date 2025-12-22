@@ -1,12 +1,12 @@
 package repositorysql
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"errors"
 	"web-analyzer-api/internal/model"
 	"web-analyzer-api/internal/repository"
 	"web-analyzer-api/internal/util/logger"
+
+	"github.com/google/uuid"
 )
 
 type webAnalyzerRepo struct {
@@ -45,7 +45,6 @@ func (r *webAnalyzerRepo) Update(webAnalyzer model.WebAnalyzer) (string, error) 
 }
 
 func generateID() string {
-	b := make([]byte, 16)
-	rand.Read(b)
-	return hex.EncodeToString(b)
+	id := uuid.New().String()
+	return id
 }

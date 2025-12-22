@@ -36,11 +36,12 @@ func (h WebAnalyzerHandler) RegisterRoutes(v1 *gin.RouterGroup) {
 
 func (h WebAnalyzerHandler) analyzeWebsite(c *gin.Context) {
 	var req contract.WebAnalyzeRequest
-	if !h.validateRequest(c, &req) {
+	parsedURL, ok := h.validateRequest(c, &req)
+	if !ok {
 		return
 	}
 
-	result, err := h.webAnalyzerService.AnalyzeWebsite(c.Request.Context(), req.URL)
+	result, err := h.webAnalyzerService.AnalyzeWebsite(c.Request.Context(), parsedURL)
 
 	if err != nil {
 		util.SetRequestError(c, err, h.log)
@@ -67,21 +68,21 @@ func (h WebAnalyzerHandler) getAnalyzeData(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
-func (h *WebAnalyzerHandler) validateRequest(c *gin.Context, req *contract.WebAnalyzeRequest) bool {
+func (h *WebAnalyzerHandler) validateRequest(c *gin.Context, req *contract.WebAnalyzeRequest) (*url.URL, bool) {
 	if err := json.NewDecoder(c.Request.Body).Decode(req); err != nil {
 		util.SetRequestError(c, apperror.BadRequest("Invalid request body: "+err.Error()), h.log)
-		return false
+		return nil, false
 	}
 
 	// Validate URL format
 	parsedURL, err := url.Parse(req.URL)
 	if err != nil {
 		util.SetRequestError(c, apperror.BadRequest("Invalid URL format: "+err.Error()), h.log)
-		return false
+		return nil, false
 	}
 	if parsedURL.Scheme == "" || parsedURL.Host == "" {
 		util.SetRequestError(c, apperror.BadRequest("Invalid URL format. Please provide a valid URL with scheme (http:// or https://)"), h.log)
-		return false
+		return nil, false
 	}
-	return true
+	return parsedURL, true
 }

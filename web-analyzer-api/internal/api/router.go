@@ -5,11 +5,14 @@ import (
 	"web-analyzer-api/internal/di"
 	"web-analyzer-api/internal/util/logger"
 
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func SetupRouter(router *gin.Engine, handlers di.HTTPHandlers, logger *logger.Logger) error {
+	pprof.Register(router)
+	router.Use(middleware.CORSMiddleware())
 	router.Use(middleware.ErrorHandler(*logger))
 	router.Use(middleware.PrometheusMiddleware())
 	router.Use(gin.Recovery())
