@@ -3,7 +3,7 @@ package middleware
 import (
 	"strconv"
 	"time"
-	"web-analyzer-api/internal/util/metrics"
+	"web-analyzer-api/app/internal/util/metrics"
 
 	"github.com/gin-gonic/gin"
 )
