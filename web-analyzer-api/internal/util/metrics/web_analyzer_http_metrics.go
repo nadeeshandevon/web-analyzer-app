@@ -21,7 +21,7 @@ var (
 			Help:    "Duration of HTTP requests in seconds",
 			Buckets: prometheus.DefBuckets,
 		},
-		[]string{"method", "path"},
+		APIRequestDurationLabels,
 	)
 
 	registerDashboardOnce sync.Once

@@ -3,16 +3,17 @@ package model
 import "time"
 
 type WebAnalyzer struct {
-	ID           string
-	URL          string
-	HTMLVersion  string
-	Title        string
-	Headings     map[string]int
-	Links        LinkAnalysis
-	HasLoginForm bool
-	Status       string
-	CreatedAt    time.Time
-	UpdatedAt    *time.Time
+	ID               string
+	URL              string
+	HTMLVersion      string
+	Title            string
+	Headings         map[string]int
+	Links            LinkAnalysis
+	HasLoginForm     bool
+	Status           string
+	ErrorDescription *string
+	CreatedAt        time.Time
+	UpdatedAt        *time.Time
 }
 
 type LinkAnalysis struct {

@@ -21,3 +21,8 @@ var APILabels = []string{
 	LabelEndpoint,
 	LabelStatus,
 }
+
+var APIRequestDurationLabels = []string{
+	LabelMethod,
+	LabelEndpoint,
+}
