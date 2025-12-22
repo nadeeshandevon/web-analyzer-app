@@ -2,9 +2,9 @@ package repositorysql
 
 import (
 	"errors"
-	"web-analyzer-api/internal/model"
-	"web-analyzer-api/internal/repository"
-	"web-analyzer-api/internal/util/logger"
+	"web-analyzer-api/app/internal/model"
+	"web-analyzer-api/app/internal/repository"
+	"web-analyzer-api/app/internal/util/logger"
 
 	"github.com/google/uuid"
 )

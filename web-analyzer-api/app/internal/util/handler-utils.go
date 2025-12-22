@@ -1,7 +1,7 @@
 package util
 
 import (
-	"web-analyzer-api/internal/util/logger"
+	"web-analyzer-api/app/internal/util/logger"
 
 	"github.com/gin-gonic/gin"
 )

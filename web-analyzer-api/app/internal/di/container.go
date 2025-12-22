@@ -1,10 +1,10 @@
 package di
 
 import (
-	v1 "web-analyzer-api/internal/api/v1"
-	webanalyzer "web-analyzer-api/internal/core/web_analyzer"
-	"web-analyzer-api/internal/repositorysql"
-	"web-analyzer-api/internal/util/logger"
+	v1 "web-analyzer-api/app/internal/api/v1"
+	webanalyzer "web-analyzer-api/app/internal/core/web_analyzer"
+	"web-analyzer-api/app/internal/repositorysql"
+	"web-analyzer-api/app/internal/util/logger"
 )
 
 type HTTPHandlers struct {

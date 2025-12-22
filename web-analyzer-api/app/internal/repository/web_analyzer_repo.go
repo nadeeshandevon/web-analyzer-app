@@ -1,6 +1,6 @@
 package repository
 
-import "web-analyzer-api/internal/model"
+import "web-analyzer-api/app/internal/model"
 
 type WebAnalyzerRepository interface {
 	Save(webAnalyzer model.WebAnalyzer) (string, error)

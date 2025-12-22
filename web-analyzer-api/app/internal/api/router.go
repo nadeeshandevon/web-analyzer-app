@@ -1,9 +1,9 @@
 package api
 
 import (
-	"web-analyzer-api/internal/api/middleware"
-	"web-analyzer-api/internal/di"
-	"web-analyzer-api/internal/util/logger"
+	"web-analyzer-api/app/internal/api/middleware"
+	"web-analyzer-api/app/internal/di"
+	"web-analyzer-api/app/internal/util/logger"
 
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"

@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"net/http"
-	"web-analyzer-api/internal/core/apperror"
-	"web-analyzer-api/internal/util/logger"
+	"web-analyzer-api/app/internal/core/apperror"
+	"web-analyzer-api/app/internal/util/logger"
 
 	"github.com/gin-gonic/gin"
 )

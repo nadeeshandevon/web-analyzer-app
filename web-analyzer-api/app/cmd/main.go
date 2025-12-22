@@ -9,9 +9,9 @@ import (
 	"os/signal"
 	"time"
 
-	"web-analyzer-api/internal/api"
-	"web-analyzer-api/internal/di"
-	"web-analyzer-api/internal/util/logger"
+	"web-analyzer-api/app/internal/api"
+	"web-analyzer-api/app/internal/di"
+	"web-analyzer-api/app/internal/util/logger"
 
 	"github.com/gin-gonic/gin"
 )
