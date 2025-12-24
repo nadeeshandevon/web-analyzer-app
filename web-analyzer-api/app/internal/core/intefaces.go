@@ -7,6 +7,7 @@ import (
 )
 
 type WebAnalyzerService interface {
-	AnalyzeWebsite(ctx context.Context, baseURL *url.URL) (analysisId string, err error)
 	GetAnalyzeData(ctx context.Context, analyzeId string) (*contract.WebAnalyzeResponse, error)
+	AnalyzeWebsite(ctx context.Context, baseURL *url.URL) (analysisId string, err error)
+	UpdateAnalysisStatus(analyzeId string, status string, errorDescription string)
 }

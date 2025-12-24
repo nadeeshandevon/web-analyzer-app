@@ -20,6 +20,7 @@ func SetupRouter(router *gin.Engine, handlers di.HTTPHandlers, logger *logger.Lo
 	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	v1 := router.Group("/api/v1")
+	v1.Use(middleware.AuthMiddleware(logger))
 	handlers.WebAnalyzerHandler.RegisterRoutes(v1)
 
 	logger.Info("Router setup completed successfully")

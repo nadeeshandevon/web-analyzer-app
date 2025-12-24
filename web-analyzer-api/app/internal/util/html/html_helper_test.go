@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/html"
 )
 
@@ -44,13 +45,9 @@ func TestGetTitle(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			doc, err := html.Parse(strings.NewReader(tt.html))
-			if err != nil {
-				t.Fatalf("Failed to parse HTML: %v", err)
-			}
+			assert.NoError(t, err)
 
-			if got := GetTitle(doc); got != tt.expected {
-				t.Errorf("GetTitle() = %v, want %v", got, tt.expected)
-			}
+			assert.Equal(t, tt.expected, GetTitle(doc))
 		})
 	}
 }
@@ -91,9 +88,7 @@ func TestGetHTMLVersion(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			doc, _ := html.Parse(strings.NewReader(tt.html))
-			if got := GetHTMLVersion(doc); got != tt.expected {
-				t.Errorf("GetHTMLVersion() = %v, want %v", got, tt.expected)
-			}
+			assert.Equal(t, tt.expected, GetHTMLVersion(doc))
 		})
 	}
 }
@@ -138,11 +133,7 @@ func TestGetHeadingsCount(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			doc, _ := html.Parse(strings.NewReader(tt.html))
 			got := GetHeadingsCount(doc)
-			for tag, count := range tt.expected {
-				if got[tag] != count {
-					t.Errorf("GetHeadingsCount() for %s = %v, want %v", tag, got[tag], count)
-				}
-			}
+			assert.Equal(t, tt.expected, got)
 		})
 	}
 }
@@ -179,15 +170,7 @@ func TestGetLinks(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			doc, _ := html.Parse(strings.NewReader(tt.html))
 			got := GetLinks(doc)
-			if len(got) != len(tt.expected) {
-				t.Errorf("GetLinks() returned %d links, want %d", len(got), len(tt.expected))
-				return
-			}
-			for i := range got {
-				if got[i] != tt.expected[i] {
-					t.Errorf("GetLinks()[%d] = %v, want %v", i, got[i], tt.expected[i])
-				}
-			}
+			assert.Equal(t, tt.expected, got)
 		})
 	}
 }
@@ -224,9 +207,7 @@ func TestIsInternalLink(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := IsInternalLink(tt.link, baseURL); got != tt.expected {
-				t.Errorf("IsInternalLink(%v) = %v, want %v", tt.link, got, tt.expected)
-			}
+			assert.Equal(t, tt.expected, IsInternalLink(tt.link, baseURL))
 		})
 	}
 }
@@ -272,9 +253,7 @@ func TestHasLoginForm(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			doc, _ := html.Parse(strings.NewReader(tt.html))
-			if got := HasLoginForm(doc); got != tt.expected {
-				t.Errorf("HasLoginForm() = %v, want %v (html: %s)", got, tt.expected, tt.html)
-			}
+			assert.Equal(t, tt.expected, HasLoginForm(doc))
 		})
 	}
 }

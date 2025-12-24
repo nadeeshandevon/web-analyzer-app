@@ -1,5 +1,6 @@
-// const API_BASE_URL = '/api/v1/web-analyzer';
-const API_BASE_URL = 'http://localhost:8081/api/v1/web-analyzer';
+const API_BASE_URL = '/api/v1/web-analyzer';
+//const API_BASE_URL = 'http://localhost:8081/api/v1/web-analyzer';
+const API_KEY = 'dev-key-123';
 
 const app = {
     initApp: function (e) {
@@ -36,6 +37,9 @@ const app = {
         $.ajax({
             type: "POST",
             url: `${API_BASE_URL}/analyze`,
+            headers: {
+                'x-api-key': API_KEY
+            },
             data: JSON.stringify({ url }),
             dataType: 'json',
             success: analyzeWebsiteSuccess,
@@ -57,9 +61,9 @@ const app = {
             app.pollResults(analyzeId);
         }
 
-        function analyzeWebsiteError(error) {
-            console.log(error);
-            statusText.text(`Error: ${error.message}`);
+        function analyzeWebsiteError(jqXHR, textStatus) {
+            console.log(`Error: ${textStatus} - Status: ${jqXHR.status} - Message: ${jqXHR.responseText}`);
+            statusText.text(`Error: ${textStatus} - Status: ${jqXHR.status} - Message: ${jqXHR.responseText}`);
             analyzeBtn.disabled = false;
             loadingSpinner.hide();
         }
@@ -75,6 +79,9 @@ const app = {
             $.ajax({
                 type: "GET",
                 url: `${API_BASE_URL}/${analyzeId}/analyze`,
+                headers: {
+                    'x-api-key': API_KEY
+                },
                 dataType: 'json',
                 success: pollResultsSuccess,
                 error: pollResultsError
@@ -82,7 +89,7 @@ const app = {
         }, 5000);
 
         function pollResultsSuccess(data) {
-            if (data.status === undefined || data.status === 'failed') {
+            if (data.status === 'failed') {
                 clearInterval(interval);
                 errorText.text(data.error_description)
                 statusText.text('Analysis failed.');
@@ -106,9 +113,9 @@ const app = {
             }
         }
 
-        function pollResultsError(error) {
-            console.log(error);
-            statusText.text(`Error: ${error.message}`);
+        function pollResultsError(jqXHR, textStatus) {
+            console.log(`Error: ${textStatus} - Status: ${jqXHR.status} - Message: ${jqXHR.responseText}`);
+            statusText.text(`Error: ${textStatus} - Status: ${jqXHR.status} - Message: ${jqXHR.responseText}`);
             analyzeBtn.disabled = false;
             loadingSpinner.hide();
         }

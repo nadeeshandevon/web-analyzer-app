@@ -114,6 +114,12 @@ func (s *webAnalyzerService) UpdateAnalysisStatus(analyzeId string, status strin
 	analysis, err := s.repo.GetById(analyzeId)
 	if err != nil {
 		s.log.Error("Failed to get analysis data: " + err.Error())
+		return
+	}
+
+	if analysis == nil {
+		s.log.Warn("Analysis not found for update: " + analyzeId)
+		return
 	}
 
 	analysis.Status = status

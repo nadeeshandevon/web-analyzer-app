@@ -29,6 +29,10 @@ func InternalServerError(message string) *AppError {
 	return categorizedError(message, http.StatusInternalServerError, CategoryInternal)
 }
 
+func Unauthorized(message string) *AppError {
+	return categorizedError(message, http.StatusUnauthorized, CategoryAuth)
+}
+
 func NotFound(message string) *AppError {
 	return categorizedError(message, http.StatusNotFound, CategoryValidation)
 }

@@ -14,7 +14,7 @@ var defaultLogger *Logger
 
 func Get(level string) *Logger {
 	if defaultLogger == nil {
-		logLevel := parseLogLevel(level)
+		logLevel := getLogLevel(level)
 		h := slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{Level: logLevel})
 		defaultLogger = &Logger{Logger: slog.New(h)}
 		slog.SetDefault(defaultLogger.Logger)
@@ -22,7 +22,7 @@ func Get(level string) *Logger {
 	return defaultLogger
 }
 
-func parseLogLevel(level string) slog.Level {
+func getLogLevel(level string) slog.Level {
 	switch strings.ToLower(level) {
 	case "debug":
 		return slog.LevelDebug
