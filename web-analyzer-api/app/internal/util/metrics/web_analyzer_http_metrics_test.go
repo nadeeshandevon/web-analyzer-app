@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/prometheus/client_golang/prometheus/testutil"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRecordHttpRequestTotal(t *testing.T) {
@@ -18,12 +19,9 @@ func TestRecordHttpRequestTotal(t *testing.T) {
 	RecordHttpRequestTotal(method, path, status)
 
 	count1 := testutil.ToFloat64(httpRequestsTotal.WithLabelValues(method, path, status))
-	if count1 != initialCount+1 {
-		t.Errorf("Expected count to be %f, got %f", initialCount+1, count1)
-	}
+	assert.Equal(t, initialCount+1, count1)
+
 	RecordHttpRequestTotal(method, path, status)
 	count2 := testutil.ToFloat64(httpRequestsTotal.WithLabelValues(method, path, status))
-	if count2 != initialCount+2 {
-		t.Errorf("Expected count to be %f, got %f", initialCount+2, count2)
-	}
+	assert.Equal(t, initialCount+2, count2)
 }
