@@ -1,0 +1,31 @@
+flowchart LR
+ subgraph ExternalUser["External User"]
+        User["Browser / Client"]
+  end
+  subgraph External["External Website/URL"]
+        ExtWeb["External Websites"]
+  end
+ subgraph subGraph1["Frontend Container (Nginx)"]
+        Static["Static Assets: HTML/JS/CSS"]
+        Proxy["Nginx Reverse Proxy"]
+  end
+ subgraph subGraph2["API Container (Go)"]
+        Router["Gin Router"]
+        Middleware["Middleware: Prometheus, pprof, CORS"]
+        Service["Web Analysis Service"]
+        Repo["In-Memory Repository"]
+        Workers["Link Check Worker Pool"]
+  end
+ subgraph subGraph3["Dockerized Environment"]
+        subGraph1
+        subGraph2
+  end
+    User -- Access --> Static
+    User -- API Requests --> Proxy
+    Proxy -- Forward /api --> Router
+    Router --> Middleware
+    Middleware --> Service
+    Service --> Repo
+    Service -- Parallel Requests --> Workers
+    Workers -- Chech URL Accessibility --> ExtWeb
+    Service -- Parse HTML --> ExtWeb
