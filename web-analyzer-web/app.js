@@ -75,6 +75,7 @@ const app = {
         const analyzeBtn = $('#btnAnalyze');
         const errorText = $('#errorText');
 
+        //Poll results every 3 seconds
         const interval = setInterval(function () {
             $.ajax({
                 type: "GET",
@@ -86,7 +87,7 @@ const app = {
                 success: pollResultsSuccess,
                 error: pollResultsError
             });
-        }, 5000);
+        }, 3000);
 
         function pollResultsSuccess(data) {
             if (data.status === 'failed') {
