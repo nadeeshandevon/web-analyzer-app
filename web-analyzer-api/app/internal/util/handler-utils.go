@@ -9,8 +9,9 @@ import (
 const errDefaultMessage = "Error while setting error in context"
 
 func SetRequestError(c *gin.Context, err error, log *logger.Logger) {
-	err1 := c.Error(err)
-	if err1 == nil {
-		log.Error(errDefaultMessage, "error", errDefaultMessage)
+	if err == nil {
+		log.Error(errDefaultMessage, "error", "nil error provided")
+		return
 	}
+	c.Error(err)
 }

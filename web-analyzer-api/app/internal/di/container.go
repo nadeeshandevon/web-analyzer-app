@@ -17,9 +17,9 @@ type Container struct {
 
 func NewContainer(logger *logger.Logger) *Container {
 	webAnalyzerRepo := repositorysql.NewWebAnalyzerRepo(logger)
-	webAnalyzerService := webanalyzer.NewWebAnalyzerService(logger, webAnalyzerRepo)
+	linkChecker := webanalyzer.NewLinkChecker(logger)
+	webAnalyzerService := webanalyzer.NewWebAnalyzerService(logger, webAnalyzerRepo, linkChecker)
 	webAnalyzerHandler := v1.NewWebAnalyzerHandler(logger, webAnalyzerService)
-
 	logger.Info("Dependency injection container initialized successfully")
 
 	return &Container{

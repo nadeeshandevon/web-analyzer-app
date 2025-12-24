@@ -164,6 +164,11 @@ func TestGetLinks(t *testing.T) {
 			html:     `<p>Empty links</p>`,
 			expected: nil,
 		},
+		{
+			name:     "No html",
+			html:     ``,
+			expected: nil,
+		},
 	}
 
 	for _, tt := range tests {

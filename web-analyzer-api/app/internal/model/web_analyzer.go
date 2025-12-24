@@ -27,3 +27,9 @@ type InaccessibleLink struct {
 	URL        string
 	StatusCode int
 }
+
+type LinkCheckResult struct {
+	URL          string
+	StatusCode   int
+	IsAccessible bool
+}

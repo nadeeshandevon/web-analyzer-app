@@ -24,8 +24,14 @@ func AuthMiddleware(log *logger.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		requestKey := c.GetHeader(ApiKeyHeader)
 
-		if requestKey == "" || requestKey != apiKey {
-			util.SetRequestError(c, apperror.Unauthorized("Invalid or missing API key"), log)
+		if requestKey == "" {
+			util.SetRequestError(c, apperror.Unauthorized("Missing API key"), log)
+			c.Abort()
+			return
+		}
+
+		if requestKey != apiKey {
+			util.SetRequestError(c, apperror.Unauthorized("Invalid API key"), log)
 			c.Abort()
 			return
 		}

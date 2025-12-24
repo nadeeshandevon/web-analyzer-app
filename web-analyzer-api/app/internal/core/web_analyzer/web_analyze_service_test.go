@@ -2,8 +2,11 @@ package webanalyzer
 
 import (
 	"context"
+	"net/http"
 	"net/url"
+	"sync"
 	"testing"
+
 	core "web-analyzer-api/app/internal/core"
 	"web-analyzer-api/app/internal/core/apperror"
 	"web-analyzer-api/app/internal/model"
@@ -36,20 +39,39 @@ func (m *MockWebAnalyzerRepository) Update(analysis model.WebAnalyzer) (string, 
 	return args.String(0), args.Error(1)
 }
 
-func setupTest() (service core.WebAnalyzerService, repo *MockWebAnalyzerRepository) {
+// Mock LinkChecker
+type MockLinkChecker struct {
+	mock.Mock
+}
+
+func (m *MockLinkChecker) CheckLink(ctx context.Context, client *http.Client, link string, baseURL *url.URL) *model.LinkCheckResult {
+	args := m.Called(ctx, client, link, baseURL)
+	if args.Get(0) == nil {
+		return nil
+	}
+	return args.Get(0).(*model.LinkCheckResult)
+}
+
+func (m *MockLinkChecker) RunWorker(ctx context.Context, linksChan <-chan string, resultsChan chan<- model.LinkCheckResult, baseURL *url.URL, wg *sync.WaitGroup) {
+	m.Called(ctx, linksChan, resultsChan, baseURL, wg)
+	wg.Done()
+}
+
+func setupTest() (service core.WebAnalyzerService, repo *MockWebAnalyzerRepository, linkChecker *MockLinkChecker) {
 	log := logger.Get("info")
 	mockRepo := new(MockWebAnalyzerRepository)
-	service = NewWebAnalyzerService(log, mockRepo)
-	return service, mockRepo
+	mockLinkChecker := new(MockLinkChecker)
+	service = NewWebAnalyzerService(log, mockRepo, mockLinkChecker)
+	return service, mockRepo, mockLinkChecker
 }
 
 func TestNewWebAnalyzerService(t *testing.T) {
-	service, _ := setupTest()
+	service, _, _ := setupTest()
 	assert.NotNil(t, service)
 }
 
 func TestGetAnalyzeData(t *testing.T) {
-	service, mockRepo := setupTest()
+	service, mockRepo, _ := setupTest()
 	analysisId := "id-123456789"
 
 	t.Run("Success", func(t *testing.T) {
@@ -94,7 +116,7 @@ func TestGetAnalyzeData(t *testing.T) {
 }
 
 func TestUpdateAnalysisStatus(t *testing.T) {
-	service, mockRepo := setupTest()
+	service, mockRepo, _ := setupTest()
 	analysisId := "id-123456789"
 
 	t.Run("Update Status and Error", func(t *testing.T) {
@@ -115,7 +137,7 @@ func TestUpdateAnalysisStatus(t *testing.T) {
 }
 
 func TestAnalyzeWebsite(t *testing.T) {
-	service, mockRepo := setupTest()
+	service, mockRepo, _ := setupTest()
 	baseURL, _ := url.Parse("http://test.com")
 
 	t.Run("Success Path", func(t *testing.T) {
