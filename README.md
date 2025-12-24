@@ -12,4 +12,10 @@ The Web Analyzer consists of a **Go-based REST API** and a **responsive web fron
 
 The system follows a decoupled client-server architecture where the frontend communicates with the backend through a reverse proxy. This ensures security, simplifies CORS management, and allows for seamless scaling of individual components.
 
-![High-Level Architecture](docs/high-level-architecture.mmd)
+```mermaid
+flowchart LR
+    User(("User")) -- HTTPS --> Proxy["Nginx Proxy"]
+    Proxy -- Serve --> FE["Frontend Assets : HTML/JS/CSS"]
+    Proxy -- HTTP API Calls --> BE["Go API Server"]
+    BE -- Analyze --> Internet(("Target Website"))
+```
