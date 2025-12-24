@@ -1,0 +1,6 @@
+flowchart LR
+    User(("User")) -- HTTPS --> Proxy["Nginx Proxy"]
+    Proxy -- Serve --> FE["Frontend Assets 
+    : HTML/JS/CSS"]
+    Proxy -- HTTP API Calls --> BE["Go API Server"]
+    BE -- Analyze --> Internet(("Target Website"))
