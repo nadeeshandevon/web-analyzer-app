@@ -8,6 +8,7 @@ import (
 const (
 	CategoryValidation = "validation"
 	CategoryAuth       = "auth"
+	CategoryNotFound   = "not_found"
 	CategoryInternal   = "internal"
 	CategoryDownstream = "downstream"
 	CategoryUnknown    = "unknown"
@@ -34,7 +35,7 @@ func Unauthorized(message string) *AppError {
 }
 
 func NotFound(message string) *AppError {
-	return categorizedError(message, http.StatusNotFound, CategoryValidation)
+	return categorizedError(message, http.StatusNotFound, CategoryNotFound)
 }
 
 func (e *AppError) Error() string {

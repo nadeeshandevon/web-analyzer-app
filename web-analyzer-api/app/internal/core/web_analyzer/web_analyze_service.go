@@ -5,9 +5,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-	"strings"
 	"sync"
-	"time"
 	"web-analyzer-api/app/internal/core"
 	"web-analyzer-api/app/internal/core/apperror"
 	"web-analyzer-api/app/internal/model"
@@ -25,23 +23,19 @@ const (
 	StatusFailed  = "failed"
 )
 
-type linkCheckResult struct {
-	url          string
-	statusCode   int
-	isAccessible bool
-}
-
 type webAnalyzerService struct {
-	log  *logger.Logger
-	repo repository.WebAnalyzerRepository
-	wg   *sync.WaitGroup
+	log         *logger.Logger
+	repo        repository.WebAnalyzerRepository
+	linkChecker core.LinkChecker
+	wg          *sync.WaitGroup
 }
 
-func NewWebAnalyzerService(logger *logger.Logger, repo repository.WebAnalyzerRepository) core.WebAnalyzerService {
+func NewWebAnalyzerService(logger *logger.Logger, repo repository.WebAnalyzerRepository, linkChecker core.LinkChecker) core.WebAnalyzerService {
 	return &webAnalyzerService{
-		log:  logger,
-		repo: repo,
-		wg:   &sync.WaitGroup{},
+		log:         logger,
+		repo:        repo,
+		linkChecker: linkChecker,
+		wg:          &sync.WaitGroup{},
 	}
 }
 
@@ -189,16 +183,17 @@ func (s *webAnalyzerService) analyzeLinks(ctx context.Context, doc *html.Node, b
 	}
 
 	linksChan := make(chan string, len(links))
-	resultsChan := make(chan linkCheckResult, len(links))
+	resultsChan := make(chan model.LinkCheckResult, len(links))
 
 	numWorkers := 10
 	if len(links) < numWorkers {
 		numWorkers = len(links)
 	}
 
+	//Start check links workers in background
 	for i := 0; i < numWorkers; i++ {
 		s.wg.Add(1)
-		go s.linkCheckWorker(ctx, linksChan, resultsChan, baseURL)
+		go s.linkChecker.RunWorker(ctx, linksChan, resultsChan, baseURL, s.wg)
 	}
 
 	for _, link := range links {
@@ -213,11 +208,11 @@ func (s *webAnalyzerService) analyzeLinks(ctx context.Context, doc *html.Node, b
 	}()
 
 	for result := range resultsChan {
-		if !result.isAccessible {
+		if !result.IsAccessible {
 			analysis.Inaccessible++
 			analysis.InaccessibleDetails = append(analysis.InaccessibleDetails, model.InaccessibleLink{
-				URL:        result.url,
-				StatusCode: result.statusCode,
+				URL:        result.URL,
+				StatusCode: result.StatusCode,
 			})
 		}
 	}
@@ -231,93 +226,4 @@ func (s *webAnalyzerService) analyzeLinks(ctx context.Context, doc *html.Node, b
 	}
 
 	return analysis
-}
-
-func (s *webAnalyzerService) linkCheckWorker(ctx context.Context, linksChan <-chan string, resultsChan chan<- linkCheckResult, baseURL *url.URL) {
-	defer s.wg.Done()
-	defer s.log.Info("Link check worker stopped")
-
-	client := &http.Client{
-		Timeout: 10 * time.Second,
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
-
-	for link := range linksChan {
-		select {
-		case <-ctx.Done():
-			return
-		default:
-		}
-
-		result := s.checkLink(ctx, client, link, baseURL)
-		if result != nil {
-			select {
-			case resultsChan <- *result:
-			case <-ctx.Done():
-				return
-			}
-		}
-	}
-}
-
-func (s *webAnalyzerService) checkLink(ctx context.Context, client *http.Client, link string, baseURL *url.URL) *linkCheckResult {
-	if link == "" || strings.HasPrefix(link, "#") || strings.HasPrefix(link, "javascript:") || strings.HasPrefix(link, "mailto:") {
-		s.log.Warn("Invalid link: " + link)
-		return nil
-	}
-
-	absoluteURL := link
-	if !strings.HasPrefix(link, "http://") && !strings.HasPrefix(link, "https://") {
-		parsedLink, err := url.Parse(link)
-		if err != nil {
-			s.log.Warn("Invalid link: " + link)
-			return nil
-		}
-		absoluteURL = baseURL.ResolveReference(parsedLink).String()
-	}
-
-	req, err := http.NewRequestWithContext(ctx, "HEAD", absoluteURL, nil)
-	if err != nil {
-		s.log.Warn("Invalid link: " + link)
-		return nil
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		s.log.Debug("Inaccessible link: " + link)
-
-		req, err = http.NewRequestWithContext(ctx, "GET", absoluteURL, nil)
-		if err != nil {
-			s.log.Debug("Inaccessible link: " + link)
-			return nil
-		}
-		resp, err = client.Do(req)
-		if err != nil {
-			s.log.Debug("Inaccessible link: " + link)
-			return &linkCheckResult{
-				url:          absoluteURL,
-				statusCode:   0,
-				isAccessible: false,
-			}
-		}
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode >= 400 {
-		s.log.Debug("Inaccessible link: " + link + " with status code: " + strconv.Itoa(resp.StatusCode))
-		return &linkCheckResult{
-			url:          absoluteURL,
-			statusCode:   resp.StatusCode,
-			isAccessible: false,
-		}
-	}
-
-	s.log.Debug("Accessible link: " + link + " with status code: " + strconv.Itoa(resp.StatusCode))
-	return &linkCheckResult{
-		url:          absoluteURL,
-		statusCode:   resp.StatusCode,
-		isAccessible: true,
-	}
 }
