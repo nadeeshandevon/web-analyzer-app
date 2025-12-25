@@ -271,7 +271,7 @@ go tool cover -html=coverage.out
 ## Possible Improvements
 
 - **Database Persistence**: Currently, analysis results are stored in an in-memory map. We can use a database (MongoDB or Postgres) to store the results.
-- **Enhanced Analysis**: Add more prometheus metrics to monitor worker jobs.
+- **Enhanced Analysis**: Add more prometheus metrics to monitor worker jobs. And integrate with a Prometheus server to collect metrics and a Grafana server to visualize metrics.
 - **Advanced Frontend**: Migrate to a framework like React or Vue with proper JS minification and bundling.
 - **Authentication**: Upgrade to JWT-based authentication for user-specific data.
 - **Unit Tests**: Add more unit tests to cover edge cases and increase code coverage.
