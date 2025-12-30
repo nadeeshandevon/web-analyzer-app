@@ -182,7 +182,7 @@ If you are running the Go API locally (usually on port 8081) and opening the `in
 const API_BASE_URL = 'http://localhost:8081/api/v1/web-analyzer';
 ```
 
-**Security Note**: Ensure the `API_KEY` in `app.js` matches the `API_KEY` environment variable used by the backend. (Note: Currently, API_KEY is hardcoded to `dev-key-123` in both frontend and backend)
+**Security Note**: Ensure the `API_KEY` in `app.js` matches the `API_KEY` environment variable used by the backend. (Note: Currently, `API_KEY` is set to `dev-key-123` by default in both frontend and backend)
 
 ## Setup & Installation
 
@@ -265,7 +265,7 @@ go tool cover -html=coverage.out
 
 ## Challenges & Approaches
 
-- **Docker Networking & Portability**: Initially, the frontend was hardcoded to `localhost`. But solved this by implementing an Nginx reverse proxy inside the frontend container and using relative paths in JavaScript.
+- **Containerized Networking & Reverse Proxying**: The frontend was originally configured to communicate with the API via a static `localhost` URI, which restricted portability in containerized setups. This was resolved by integrating an **Nginx reverse proxy** within the frontend container. Nginx serves the static web assets and seamlessly routes API calls to the backend service over the internal Docker network. This approach enables the use of **relative paths** in JavaScript, ensuring the application is environment-agnostic and simplifying communication by avoiding CORS issues.
 - **Asynchronous Processing**: Checking hundreds of links on a page is slow. So, implemented a worker pool using Go channels and goroutines to perform link health checks in parallel.
 
 ## Possible Improvements
