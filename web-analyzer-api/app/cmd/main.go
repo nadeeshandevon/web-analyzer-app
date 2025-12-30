@@ -13,6 +13,7 @@ import (
 	"web-analyzer-api/app/internal/di"
 	"web-analyzer-api/app/internal/util/logger"
 
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -45,6 +46,8 @@ func main() {
 		metricsPort = "9090"
 	}
 
+	enablePprof := os.Getenv("ENABLE_PPROF") == "true"
+
 	log.Info("Starting HTTP server", "port", serverPort)
 	httpServer := &http.Server{
 		Addr:    fmt.Sprintf(":%s", serverPort),
@@ -62,6 +65,11 @@ func main() {
 	metricsRouter := gin.New()
 	metricsRouter.Use(gin.Recovery())
 	metricsRouter.GET("/metrics", gin.WrapH(promhttp.Handler()))
+
+	if enablePprof {
+		log.Info("Enabling pprof on metrics server")
+		pprof.Register(metricsRouter)
+	}
 
 	metricsServer := &http.Server{
 		Addr:    fmt.Sprintf(":%s", metricsPort),
