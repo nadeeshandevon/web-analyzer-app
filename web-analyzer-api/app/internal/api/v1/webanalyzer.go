@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/url"
+	"web-analyzer-api/app/internal/contract"
 	"web-analyzer-api/app/internal/core"
 	"web-analyzer-api/app/internal/core/apperror"
 	"web-analyzer-api/app/internal/util"
 	"web-analyzer-api/app/internal/util/logger"
-	"web-analyzer-api/pkg/contract"
 
 	"github.com/gin-gonic/gin"
 )
@@ -54,7 +54,7 @@ func (h WebAnalyzerHandler) analyzeWebsite(c *gin.Context) {
 func (h WebAnalyzerHandler) getAnalyzeData(c *gin.Context) {
 	analyzeId := c.Param("analyze_id")
 	if analyzeId == "" {
-		util.SetRequestError(c, apperror.BadRequest("analyze_id is required"), h.log)
+		util.SetRequestError(c, apperror.BadRequest("Analyze id cannot be empty"), h.log)
 		return
 	}
 

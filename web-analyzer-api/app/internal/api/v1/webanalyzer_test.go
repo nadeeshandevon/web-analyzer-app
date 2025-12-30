@@ -9,9 +9,9 @@ import (
 	"net/url"
 	"testing"
 	"web-analyzer-api/app/internal/api/middleware"
+	"web-analyzer-api/app/internal/contract"
 	"web-analyzer-api/app/internal/core/apperror"
 	"web-analyzer-api/app/internal/util/logger"
-	"web-analyzer-api/pkg/contract"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"

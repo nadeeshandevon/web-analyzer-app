@@ -7,7 +7,6 @@ import (
 
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func SetupRouter(router *gin.Engine, handlers di.HTTPHandlers, logger *logger.Logger) error {
@@ -16,8 +15,6 @@ func SetupRouter(router *gin.Engine, handlers di.HTTPHandlers, logger *logger.Lo
 	router.Use(middleware.ErrorHandler(*logger))
 	router.Use(middleware.PrometheusMiddleware())
 	router.Use(gin.Recovery())
-
-	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	v1 := router.Group("/api/v1")
 	v1.Use(middleware.AuthMiddleware(logger))

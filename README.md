@@ -20,7 +20,7 @@ flowchart LR
     BE -- Analyze --> Internet(("Target Website"))
 ```
 
-### Process Flow
+### Application Components
 
 The following diagram illustrates the lifecycle of an analysis request, from the initial frontend submission to background processing.
 
@@ -69,7 +69,7 @@ flowchart LR
 ### Key URLs
 - **Frontend**: [http://localhost:8080](http://localhost:8080)
 - **API Base URL**: [http://localhost:8081/api/v1](http://localhost:8081/api/v1)
-- **Prometheus Metrics**: [http://localhost:8081/metrics](http://localhost:8081/metrics)
+- **Prometheus Metrics**: [http://localhost:9090/metrics](http://localhost:9090/metrics)
 - **pprof Profiling**: [http://localhost:8081/debug/pprof/](http://localhost:8081/debug/pprof/)
 
 ## API Reference
@@ -170,23 +170,31 @@ Retrieves the current status and results of an analysis.
 
 The frontend `app.js` needs to be configured based on your deployment method.
 
-### Docker Deployment (Nginx Proxy)
-When running within Docker, the application uses an Nginx reverse proxy. The `API_BASE_URL` should be a relative path:
+### Docker Deployment (Runtime Configuration)
+When running within Docker, the `app.js` file contains placeholders that are replaced by environment variables at runtime via the `Dockerfile`'s `CMD`.
 ```javascript
-const API_BASE_URL = '/api/v1/web-analyzer';
+const API_BASE_URL = 'API_BASE_URL_PLACEHOLDER';
+const API_KEY = 'API_KEY_PLACEHOLDER';
+```
+The values are injected from the `web-analyzer-web` service environment in [docker-compose.yml](file:///home/devon/samples/web-analyzer-app/docker-compose.yml):
+```yaml
+    environment:
+      - API_BASE_URL=/api/v1/web-analyzer
+      - API_KEY=dev-key-123
 ```
 
 ### Local Development Setup
-If you are running the Go API locally (usually on port 8081) and opening the `index.html` file directly or serving it from a different origin, you must use the full URL:
+When running the Go API locally, you should manually update these values in `app.js`:
 ```javascript
 const API_BASE_URL = 'http://localhost:8081/api/v1/web-analyzer';
+const API_KEY = 'dev-key-123';
 ```
 
-**Security Note**: Ensure the `API_KEY` in `app.js` matches the `API_KEY` environment variable used by the backend. (Note: Currently, `API_KEY` is set to `dev-key-123` by default in both frontend and backend)
+**Security Note**: The `API_KEY` must match between the frontend and the backend. In Docker, this is managed via environment variables.
 
 ## Setup & Installation
 
-### Option 1: Using Docker (Recommended)
+### Option 1: Using Docker
 
 1.  Clone the repository.
 2.  Navigate to the project root.
@@ -203,7 +211,7 @@ const API_BASE_URL = 'http://localhost:8081/api/v1/web-analyzer';
 cd web-analyzer-api
 go run app/cmd/main.go
 ```
-*The API will be available at `http://localhost:8081`.*
+*The API will be available at `http://localhost:8081` and metrics at `http://localhost:9090/metrics`.*
 
 **Run the Frontend:**
 Open `web-analyzer-web/index.html` in a browser and ensure `app.js` is configured for local access as described above.
@@ -260,8 +268,8 @@ go tool cover -html=coverage.out
 ### 2. DevOps & Observability
 - **Authentication**: `AuthMiddleware` verifies requests using the `x-api-key` header.
 - **Logging**: Structured logging using a custom `slog` wrapper.
-- **Graceful Shutdown**: The API handles termination signals gracefully.
-- **Metrics**: High-level HTTP request metrics exported for Prometheus.
+- **Graceful Shutdown**: The API handles termination signals gracefully for both the main API and the metrics server.
+- **Metrics**: High-level HTTP request metrics exported via a dedicated Gin server on port 9090.
 
 ## Challenges & Approaches
 
@@ -277,5 +285,8 @@ go tool cover -html=coverage.out
 - **Unit Tests**: Add more unit tests to cover edge cases and increase code coverage.
 - **CI/CD**: Add CI/CD pipeline to automate the build and deployment process.
 - **Rate Limiting**: Add rate limiting middleware to prevent abuse the external APIs.
+- **Web Sockets**: Add web sockets to enable real-time updates to the frontend rather than polling from frontend.
+- **Environment Variables**: Add environment variables to configure the API key and other settings.
+
 
 
