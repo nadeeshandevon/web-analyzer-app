@@ -1,5 +1,4 @@
 const API_BASE_URL = '/api/v1/web-analyzer';
-//const API_BASE_URL = 'http://localhost:8081/api/v1/web-analyzer';
 const API_KEY = 'dev-key-123';
 
 const app = {
