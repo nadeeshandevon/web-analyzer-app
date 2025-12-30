@@ -13,6 +13,7 @@ services:
       - SERVER_PORT=8081
       - METRICS_PORT=9090
       - API_KEY=dev-key-123
+      - ENABLE_PPROF=true
 
   web-analyzer-web:
     build:

@@ -70,7 +70,7 @@ flowchart LR
 - **Frontend**: [http://localhost:8080](http://localhost:8080)
 - **API Base URL**: [http://localhost:8081/api/v1](http://localhost:8081/api/v1)
 - **Prometheus Metrics**: [http://localhost:9090/metrics](http://localhost:9090/metrics)
-- **pprof Profiling**: [http://localhost:8081/debug/pprof/](http://localhost:8081/debug/pprof/)
+- **pprof Profiling**: [http://localhost:9090/debug/pprof/](http://localhost:9090/debug/pprof/) (Toggleable via `ENABLE_PPROF`)
 
 ## API Reference
 
@@ -211,7 +211,7 @@ const API_KEY = 'dev-key-123';
 cd web-analyzer-api
 go run app/cmd/main.go
 ```
-*The API will be available at `http://localhost:8081` and metrics at `http://localhost:9090/metrics`.*
+*The API will be available at `http://localhost:8081`, metrics at `http://localhost:9090/metrics`, and pprof (if enabled) at `http://localhost:9090/debug/pprof/`.*
 
 **Run the Frontend:**
 Open `web-analyzer-web/index.html` in a browser and ensure `app.js` is configured for local access as described above.
@@ -224,7 +224,7 @@ For robust local testing and development, the API was verified using the **Postm
     *   HTML versions.
     *   Heading hierarchies.
     *   Link structures (internal and external).
-    *   Presence of `<form type="password">` elements for login detection.
+    *   Login form/elements detection.
 
 ### Unit Test Coverage
 
@@ -269,7 +269,7 @@ go tool cover -html=coverage.out
 - **Authentication**: `AuthMiddleware` verifies requests using the `x-api-key` header.
 - **Logging**: Structured logging using a custom `slog` wrapper.
 - **Graceful Shutdown**: The API handles termination signals gracefully for both the main API and the metrics server.
-- **Metrics**: High-level HTTP request metrics exported via a dedicated Gin server on port 9090.
+- **Metrics & Profiling**: High-level HTTP request metrics and pprof profiling (isolate/toggleable) exported via a dedicated Gin server on port 9090.
 
 ## Challenges & Approaches
 
