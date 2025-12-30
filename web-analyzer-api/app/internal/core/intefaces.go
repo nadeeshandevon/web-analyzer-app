@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"net/url"
 	"sync"
+	"web-analyzer-api/app/internal/contract"
 	"web-analyzer-api/app/internal/model"
-	"web-analyzer-api/pkg/contract"
 )
 
 type LinkChecker interface {

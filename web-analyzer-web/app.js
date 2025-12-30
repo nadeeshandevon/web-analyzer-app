@@ -1,5 +1,5 @@
-const API_BASE_URL = '/api/v1/web-analyzer';
-const API_KEY = 'dev-key-123';
+const API_BASE_URL = 'API_BASE_URL_PLACEHOLDER';
+const API_KEY = 'API_KEY_PLACEHOLDER';
 
 const app = {
     initApp: function (e) {
@@ -10,7 +10,6 @@ const app = {
         $("#btnReset").on("click", function () {
             app.resetForm();
         });
-
     },
 
     analyzeWebsite: function (e) {
@@ -22,7 +21,7 @@ const app = {
         const errorText = $('#errorText');
 
         if (url === '') {
-            errorText.text('Please enter a URL.');
+            errorText.text('Please enter a URL to analyze.');
             return;
         }
 
@@ -62,7 +61,7 @@ const app = {
 
         function analyzeWebsiteError(jqXHR, textStatus) {
             console.log(`Error: ${textStatus} - Status: ${jqXHR.status} - Message: ${jqXHR.responseText}`);
-            statusText.text(`Error: ${textStatus} - Status: ${jqXHR.status} - Message: ${jqXHR.responseText}`);
+            statusText.text(`Analysis failed.`);
             analyzeBtn.disabled = false;
             loadingSpinner.hide();
         }
@@ -115,7 +114,7 @@ const app = {
 
         function pollResultsError(jqXHR, textStatus) {
             console.log(`Error: ${textStatus} - Status: ${jqXHR.status} - Message: ${jqXHR.responseText}`);
-            statusText.text(`Error: ${textStatus} - Status: ${jqXHR.status} - Message: ${jqXHR.responseText}`);
+            statusText.text(`Failed to fetch analysis results.`);
             analyzeBtn.disabled = false;
             loadingSpinner.hide();
         }

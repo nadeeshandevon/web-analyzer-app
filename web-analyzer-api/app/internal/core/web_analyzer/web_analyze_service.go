@@ -6,13 +6,13 @@ import (
 	"net/url"
 	"strconv"
 	"sync"
+	"web-analyzer-api/app/internal/contract"
 	"web-analyzer-api/app/internal/core"
 	"web-analyzer-api/app/internal/core/apperror"
 	"web-analyzer-api/app/internal/model"
 	"web-analyzer-api/app/internal/repository"
 	htmlhelper "web-analyzer-api/app/internal/util/html"
 	"web-analyzer-api/app/internal/util/logger"
-	"web-analyzer-api/pkg/contract"
 
 	"golang.org/x/net/html"
 )
@@ -48,7 +48,7 @@ func (s *webAnalyzerService) AnalyzeWebsite(ctx context.Context, baseURL *url.UR
 	analysisId, err = s.repo.Save(analysis)
 	if err != nil {
 		s.log.Error("Failed to save initial analysis: " + err.Error())
-		return "", apperror.BadRequest("Failed to initialize analysis: " + err.Error())
+		return "", apperror.BadRequest("Failed to save initial analysis data")
 	}
 
 	// Call background analysis
@@ -112,7 +112,7 @@ func (s *webAnalyzerService) UpdateAnalysisStatus(analyzeId string, status strin
 	}
 
 	if analysis == nil {
-		s.log.Warn("Analysis not found for update: " + analyzeId)
+		s.log.Warn("Analysis not found for update: analyzeId - " + analyzeId)
 		return
 	}
 
@@ -134,28 +134,28 @@ func (s *webAnalyzerService) processAnalysisJob(ctx context.Context, analysisId 
 	analysis, err := s.repo.GetById(analysisId)
 	if err != nil {
 		s.log.Error("Failed to get analysis data: " + err.Error())
-		s.UpdateAnalysisStatus(analysisId, StatusFailed, err.Error())
+		s.UpdateAnalysisStatus(analysisId, StatusFailed, "Failed to get analysis data.")
 		return
 	}
 
 	resp, err := http.Get(baseURL.String())
 	if err != nil {
 		s.log.Error("Failed to fetch URL: " + err.Error())
-		s.UpdateAnalysisStatus(analysisId, StatusFailed, err.Error())
+		s.UpdateAnalysisStatus(analysisId, StatusFailed, "URL cannot be accessed. URL is invalid or unreachable.")
 		return
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		s.log.Error("URL returned error status: " + strconv.Itoa(resp.StatusCode))
-		s.UpdateAnalysisStatus(analysisId, StatusFailed, "URL returned error status: "+strconv.Itoa(resp.StatusCode))
+		s.UpdateAnalysisStatus(analysisId, StatusFailed, "URL cannot be accessed. URL is invalid or unreachable.")
 		return
 	}
 
 	doc, err := html.Parse(resp.Body)
 	if err != nil {
 		s.log.Error("Failed to parse HTML: " + err.Error())
-		s.UpdateAnalysisStatus(analysisId, StatusFailed, "Failed to parse HTML: "+err.Error())
+		s.UpdateAnalysisStatus(analysisId, StatusFailed, "Failed to parse HTML content.")
 		return
 	}
 
