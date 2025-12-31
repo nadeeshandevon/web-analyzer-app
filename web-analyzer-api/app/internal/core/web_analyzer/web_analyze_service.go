@@ -27,7 +27,6 @@ type webAnalyzerService struct {
 	log         *logger.Logger
 	repo        repository.WebAnalyzerRepository
 	linkChecker core.LinkChecker
-	wg          *sync.WaitGroup
 }
 
 func NewWebAnalyzerService(logger *logger.Logger, repo repository.WebAnalyzerRepository, linkChecker core.LinkChecker) core.WebAnalyzerService {
@@ -35,7 +34,6 @@ func NewWebAnalyzerService(logger *logger.Logger, repo repository.WebAnalyzerRep
 		log:         logger,
 		repo:        repo,
 		linkChecker: linkChecker,
-		wg:          &sync.WaitGroup{},
 	}
 }
 
@@ -160,11 +158,22 @@ func (s *webAnalyzerService) processAnalysisJob(ctx context.Context, analysisId 
 	}
 
 	//Start fill analysis data
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	// Link analysis running in background
+	go func() {
+		defer wg.Done()
+		analysis.Links = s.analyzeLinks(ctx, doc, baseURL)
+	}()
+
+	// Metadata extraction from the parsed HTML document
 	analysis.HTMLVersion = htmlhelper.GetHTMLVersion(doc)
 	analysis.Title = htmlhelper.GetTitle(doc)
 	analysis.Headings = htmlhelper.GetHeadingsCount(doc)
-	analysis.Links = s.analyzeLinks(ctx, doc, baseURL)
 	analysis.HasLoginForm = htmlhelper.HasLoginForm(doc)
+
+	wg.Wait()
 	analysis.Status = StatusSuccess
 	//End fill analysis data
 
@@ -190,11 +199,13 @@ func (s *webAnalyzerService) analyzeLinks(ctx context.Context, doc *html.Node, b
 		numWorkers = len(links)
 	}
 
+	wg := &sync.WaitGroup{}
 	//Start check links workers in background
 	for i := 0; i < numWorkers; i++ {
-		s.wg.Add(1)
-		go s.linkChecker.RunWorker(ctx, linksChan, resultsChan, baseURL, s.wg)
+		wg.Add(1)
+		go s.linkChecker.RunWorker(ctx, linksChan, resultsChan, baseURL, wg)
 	}
+	//End check links workers in background
 
 	for _, link := range links {
 		linksChan <- link
@@ -203,7 +214,7 @@ func (s *webAnalyzerService) analyzeLinks(ctx context.Context, doc *html.Node, b
 	close(linksChan)
 
 	go func() {
-		s.wg.Wait()
+		wg.Wait()
 		close(resultsChan)
 	}()
 
