@@ -87,17 +87,6 @@ The backend follows a layered architecture with a concurrent worker pool for ana
 
 > [!NOTE]
 > All API requests require an API key: `x-api-key: dev-key-123`.
-## Key URLs
-
-| Service | URL |
-| :--- | :--- |
-| **Frontend** | [http://localhost:8080](http://localhost:8080) |
-| **API Base** | [http://localhost:8081/api/v1](http://localhost:8081/api/v1) |
-| **Prometheus Metrics** | [http://localhost:9090/metrics](http://localhost:9090/metrics) |
-| **pprof Profiling** | [http://localhost:9090/debug/pprof/](http://localhost:9090/debug/pprof/) |
-
-> [!NOTE]
-> All API requests require an API key: `x-api-key: dev-key-123`.
 
 ## API Reference
 
@@ -105,19 +94,13 @@ The backend follows a layered architecture with a concurrent worker pool for ana
 Starts a background analysis for a given URL.
 
 **Endpoint:** `POST /api/v1/web-analyzer/analyze`
-Starts a background analysis for a given URL.
 
-**Endpoint:** `POST /api/v1/web-analyzer/analyze`
-
-**Request Body:**
 **Request Body:**
 ```json
 {
   "url": "https://www.test-app.com"
 }
 ```
-
-**Response:**
 
 **Response:**
 ```json
@@ -130,11 +113,7 @@ Starts a background analysis for a given URL.
 Retrieves analysis status and detailed results.
 
 **Endpoint:** `GET /api/v1/web-analyzer/:analyze_id/analyze`
-Retrieves analysis status and detailed results.
 
-**Endpoint:** `GET /api/v1/web-analyzer/:analyze_id/analyze`
-
-**Success Response:**
 **Success Response:**
 ```json
 {
@@ -157,34 +136,24 @@ Retrieves analysis status and detailed results.
   "error_description": ""
 }
 ```
+---
 
----
----
 
 ## Technology Stack
 
 ### Backend
-### Backend
 - **Language**: [Go 1.23+](https://go.dev/)
-- **Framework**: [Gin Gonic](https://gin-gonic.com/)
 - **Framework**: [Gin Gonic](https://gin-gonic.com/)
 - **Monitoring**: [Prometheus](https://prometheus.io/)
 - **Profiling**: [pprof](https://pkg.go.dev/net/http/pprof)
 - **Parsing**: `golang.org/x/net/html`
-- **Parsing**: `golang.org/x/net/html`
 
 ### Frontend
 - **Framework**: Vanilla JavaScript + jQuery
 - **Styling**: Bootstrap 5
 - **Web Server**: Nginx
-
 ---
-### Frontend
-- **Framework**: Vanilla JavaScript + jQuery
-- **Styling**: Bootstrap 5
-- **Web Server**: Nginx
 
----
 
 ## Setup & Installation
 
@@ -201,22 +170,8 @@ docker-compose up --build -d
 ```
 
 Access the app at: **[http://localhost:8080](http://localhost:8080)**
-### Option 1: Docker
-```bash
-git clone https://github.com/nadeeshandevon/web-analyzer-app.git
-cd web-analyzer-app
-docker-compose up --build -d
-```
-If required to redeploy the application, run the following command:
-```bash
-docker-compose down
-docker-compose up --build -d
-```
-
-Access the app at: **[http://localhost:8080](http://localhost:8080)**
 
 ### Option 2: Local Development
-**Run API:**
 **Run API:**
 ```bash
 cd web-analyzer-api
@@ -233,43 +188,19 @@ const API_KEY = 'dev-key-123';
 ## Testing & Coverage
 
 ### Current Coverage Status
-**Run Frontend:**
-Open `web-analyzer-web/index.html` in your browser. Ensure `app.js` is configured correctly for local API access as below.
-```javascript
-const API_BASE_URL = 'http://localhost:8081/api/v1/web-analyzer';
-const API_KEY = 'dev-key-123';
-```
----
-
-## Testing & Coverage
-
-### Current Coverage Status
 The overall statement coverage for the `app` package is currently **74.8%**.
 
 ![Coverage Summary](coverage.png)
 
-![Coverage Summary](coverage.png)
-
-#### Interactive Report
-HTML coverage report is available: [coverage.html](coverage.html).
 #### Interactive Report
 HTML coverage report is available: [coverage.html](coverage.html).
 
-### How to Run Tests
 ### How to Run Tests
 ```bash
-cd web-analyzer-api
 cd web-analyzer-api
 go test ./app/... -coverprofile=coverage.out
 go tool cover -func=coverage.out
 ```
-
----
-
-## Challenges & Solutions
-
-- **Container Networking**: Solved frontend-to-backend communication issues using an Nginx reverse proxy, enabling relative API paths and eliminating CORS issues.
-- **Performance**: Implemented a goroutine-based worker pool to asynchronously validate links.
 ---
 
 ## Challenges & Solutions
