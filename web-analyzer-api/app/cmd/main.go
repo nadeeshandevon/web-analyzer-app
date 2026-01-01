@@ -22,8 +22,10 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
+	// Setup logger, HTTP and Metrics servers
 	log, mainServer, metricsServer := setupServers()
 
+	// Start HTTP server
 	go func() {
 		log.Info("HTTP server started", "address", mainServer.Addr)
 		if err := mainServer.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
@@ -31,6 +33,7 @@ func main() {
 		}
 	}()
 
+	// Start Metrics server
 	go func() {
 		log.Info("Metrics server started", "address", metricsServer.Addr)
 		if err := metricsServer.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
@@ -38,12 +41,14 @@ func main() {
 		}
 	}()
 
+	// Wait for shutdown signal
 	<-ctx.Done()
 	log.Info("Shutdown signal received, initiating graceful shutdown")
 
 	ctxTimeout, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
+	// Shutdown servers
 	var errs []error
 	if err := mainServer.Shutdown(ctxTimeout); err != nil {
 		log.Error("Failed to shutdown main server gracefully", "error", err)
