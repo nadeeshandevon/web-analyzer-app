@@ -13,7 +13,6 @@
 
 # Go test files
 coverage.txt
-coverage.html
 *.coverprofile
 
 # Dependency directories
