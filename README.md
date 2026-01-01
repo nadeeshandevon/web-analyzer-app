@@ -20,51 +20,43 @@ flowchart LR
     BE -- Analyze --> Internet(("Target Website"))
 ```
 
-### Application Components
+### Backend Architecture
 
-The following diagram illustrates the lifecycle of an analysis request, from the initial frontend submission to background processing.
+The following diagram illustrates the backend architecture of the Web Analyzer API project.
 
-- **Request Initiation**: The User submits a URL via the Frontend.
-- **Proxying**: The Nginx Proxy forwards the API request to the Go Backend.
-- **Job Creation**: The API validates the URL, creates a "pending" entry in the In-Memory Repository, and returns a unique `analyze_id`.
-- **Parallel Analysis**: The Web Analysis Service fetches the target page and starts multiple workers to check link accessibility concurrently.
-- **Data Aggregation**: Once all workers finish, the service updates the repository with the final analysis data (HTML version, headings, link counts, etc.).
-- **Polling**: The Frontend periodically polls the API with the `analyze_id` until the analysis is complete (Status: `success` or `failed`).
+![Backend Architecture](Architecture.png)
 
-```mermaid
+### Component Details
 
-flowchart LR
- subgraph ExternalUser["External User"]
-        User["Browser / Client"]
-  end
-  subgraph External["External Website/URL"]
-        ExtWeb["External Websites"]
-  end
- subgraph subGraph1["Frontend Container (Nginx)"]
-        Static["Static Assets: HTML/JS/CSS"]
-        Proxy["Nginx Reverse Proxy"]
-  end
- subgraph subGraph2["API Container (Go)"]
-        Router["Gin Router"]
-        Middleware["Middleware: Prometheus, pprof, CORS"]
-        Service["Web Analysis Service"]
-        Repo["In-Memory Repository"]
-        Workers["Link Check Worker Pool"]
-  end
- subgraph subGraph3["Dockerized Environment"]
-        subGraph1
-        subGraph2
-  end
-    User -- Access --> Static
-    User -- API Requests --> Proxy
-    Proxy -- Forward /api --> Router
-    Router --> Middleware
-    Middleware --> Service
-    Service --> Repo
-    Service -- Parallel Requests --> Workers
-    Workers -- Chech URL Accessibility --> ExtWeb
-    Service -- Parse HTML --> ExtWeb
-```
+Following are the detailed responsibilities and future directions for each component:
+
+- **Gin Router**:
+    - Acts as the primary entry point for all API requests within the Go container.
+    - Responsible for request multiplexing, URI parsing, and routing requests to the appropriate middleware and handlers.
+- **Middleware (Auth, Prometheus, pprof, CORS)**:
+    - Positioned between the Router and the Controllers to handle cross-cutting concerns.
+    - Manages security (API Key auth), performance monitoring (Prometheus metrics), debugging (pprof), and cross-origin resource sharing.
+- **API Controllers / Handlers**:
+    - Responsible for validating the incoming request body and parameters.
+    - Maps the valid request to the appropriate service layer method and handles the final response serialization back to the client.
+- **API Endpoints**:
+    - `POST /api/v1/web-analyzer/analyze`: Initiates a new background analysis. It validates the input URL and returns a unique `analyze_id`.
+    - `GET /api/v1/web-analyzer/:analyze_id/analyze`: Retrieves the current state and results of the analysis.
+- **Web Analyze Service**:
+    - Acts as the orchestration hub for the entire analysis workflow.
+    - Coordinates between the repository for state management, the HTML parser for content extraction, and the link checker worker pool for parallel processing.
+- **Web Analyze Repository**:
+    - Currently stores analysis results in a thread-safe in-memory map for fast access.
+    - **Future Enhancement**: Planned migration to persistent databases like **MongoDB** or **PostgreSQL** to support long-term data retention and complex querying.
+- **Metadata and Link Analysis**:
+    - **Metadata Extraction (Synchronous)**: Directly extracted from the parsed HTML document (HTML version, Title, Headings, Login Forms).
+    - **Link Analysis (Asynchronous)**: Performed using a concurrent worker pool to check the health and accessibility of all extracted links without blocking the main process.
+- **HTML Helper**:
+    - Responsible for low-level HTML parsing logic using `golang.org/x/net/html`.
+    - **Future Enhancement**: Plans to include more granular element extraction (e.g., meta tags, images) and basic SEO analysis.
+- **Web Analyze Worker**:
+    - Independent units of work that validate individual URL accessibility.
+    - They report back HTTP status codes (2xx, 4xx, 5xx) to determine link health.
 
 ### Key URLs
 - **Frontend**: [http://localhost:8080](http://localhost:8080)

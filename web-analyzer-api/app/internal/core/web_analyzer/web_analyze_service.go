@@ -158,22 +158,15 @@ func (s *webAnalyzerService) processAnalysisJob(ctx context.Context, analysisId 
 	}
 
 	//Start fill analysis data
-	var wg sync.WaitGroup
-	wg.Add(1)
 
-	// Link analysis running in background
-	go func() {
-		defer wg.Done()
-		analysis.Links = s.analyzeLinks(ctx, doc, baseURL)
-	}()
+	// 1. Start link analysis from the parsed HTML document
+	analysis.Links = s.analyzeLinks(ctx, doc, baseURL)
+	// End link analysis from the parsed HTML document
 
-	// Metadata extraction from the parsed HTML document
-	analysis.HTMLVersion = htmlhelper.GetHTMLVersion(doc)
-	analysis.Title = htmlhelper.GetTitle(doc)
-	analysis.Headings = htmlhelper.GetHeadingsCount(doc)
-	analysis.HasLoginForm = htmlhelper.HasLoginForm(doc)
+	// 2. Start metadata extraction from the parsed HTML document
+	s.analyzeMetadata(doc, analysis)
+	// End metadata extraction from the parsed HTML document
 
-	wg.Wait()
 	analysis.Status = StatusSuccess
 	//End fill analysis data
 
@@ -182,6 +175,13 @@ func (s *webAnalyzerService) processAnalysisJob(ctx context.Context, analysisId 
 		s.log.Error("Failed to update analysis result: " + err.Error())
 	}
 	s.log.Info("Background analysis completed for: " + baseURL.String())
+}
+
+func (s *webAnalyzerService) analyzeMetadata(doc *html.Node, analysis *model.WebAnalyzer) {
+	analysis.HTMLVersion = htmlhelper.GetHTMLVersion(doc)
+	analysis.Title = htmlhelper.GetTitle(doc)
+	analysis.Headings = htmlhelper.GetHeadingsCount(doc)
+	analysis.HasLoginForm = htmlhelper.HasLoginForm(doc)
 }
 
 func (s *webAnalyzerService) analyzeLinks(ctx context.Context, doc *html.Node, baseURL *url.URL) model.LinkAnalysis {
