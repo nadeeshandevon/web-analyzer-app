@@ -35,18 +35,11 @@ The Web Analyzer consists of:
 3.  **Dockerized Infrastructure**: Environment-agnostic deployment with monitoring.
 
 The system is designed to be scalable, observable, and easy to deploy.
-The Web Analyzer consists of:
-1.  **Go-based REST API**: Performs core analysis and orchestrates workers.
-2.  **Responsive Web Frontend**: Served via Nginx for a clean user interface.
-3.  **Dockerized Infrastructure**: Environment-agnostic deployment with monitoring.
-
-The system is designed to be scalable, observable, and easy to deploy.
 
 ## Architecture
 
 ### High-Level Architecture
 
-The frontend communicates with the backend API through an Nginx reverse proxy, simplifying CORS handling and enabling flexible deployments.
 The frontend communicates with the backend API through an Nginx reverse proxy, simplifying CORS handling and enabling flexible deployments.
 
 ![High-Level Architecture](docs/HighlevelArchitecture.png)
@@ -54,20 +47,11 @@ The frontend communicates with the backend API through an Nginx reverse proxy, s
 ### Backend Architecture
 
 The backend follows a layered architecture with a concurrent worker pool for analysis.
-The backend follows a layered architecture with a concurrent worker pool for analysis.
 
 ![Backend Architecture](docs/Architecture.png)
 
 ### Component Responsibilities
-### Component Responsibilities
 
-- **Gin Router**: Entry point for all API requests; handles routing.
-- **Middleware**: Manages API key authentication, Prometheus metrics, pprof profiling, and CORS.
-- **API Controllers / Handlers**: Validates requests, invokes service logic, and serializes responses.
-- **Web Analyze Service**: Orchestrates the workflow, coordinating parsing, state management, and link checking.
-- **Repository Layer**: Provides in-memory storage (proposing migrate to MongoDB/PostgreSQL).
-- **HTML Helper**: Parses HTML using `golang.org/x/net/html` to extract metadata and forms.
-- **Worker Pool**: Concurrently validates link accessibility and reports HTTP status codes.
 - **Gin Router**: Entry point for all API requests; handles routing.
 - **Middleware**: Manages API key authentication, Prometheus metrics, pprof profiling, and CORS.
 - **API Controllers / Handlers**: Validates requests, invokes service logic, and serializes responses.
@@ -121,13 +105,11 @@ Retrieves analysis status and detailed results.
   "html_version": "HTML5",
   "title": "Test App",
   "headings": { "h1": 1, "h2": 0 },
-  "headings": { "h1": 1, "h2": 0 },
   "links": {
     "internal": 12,
     "external": 5,
     "inaccessible": 1,
     "inaccessible_details": [
-      { "url": "https://invalid-link.com", "status_code": 404 }
       { "url": "https://invalid-link.com", "status_code": 404 }
     ]
   },
@@ -153,7 +135,6 @@ Retrieves analysis status and detailed results.
 - **Styling**: Bootstrap 5
 - **Web Server**: Nginx
 ---
-
 
 ## Setup & Installation
 
@@ -201,6 +182,7 @@ cd web-analyzer-api
 go test ./app/... -coverprofile=coverage.out
 go tool cover -func=coverage.out
 ```
+
 ---
 
 ## Challenges & Solutions
@@ -211,14 +193,7 @@ go tool cover -func=coverage.out
 ## Possible Improvements
 
 - [ ] Persistent database storage (PostgreSQL/MongoDB).
-- [ ] Advanced Prometheus metrics + Grafana dashboards and apply metric.
-- [ ] Frontend migration to React/Vue.
-- [ ] JWT-based authentication.
-- [ ] CI/CD continuous delivery pipeline.
-- [ ] API Rate limiting.
-- [ ] WebSocket-based real-time updates.
-- [ ] Persistent database storage (PostgreSQL/MongoDB).
-- [ ] Advanced Prometheus metrics + Grafana dashboards and apply metric.
+- [ ] Advanced Prometheus metrics + Grafana dashboards and apply metric for background analysis.
 - [ ] Frontend migration to React/Vue.
 - [ ] JWT-based authentication.
 - [ ] CI/CD continuous delivery pipeline.
