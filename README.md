@@ -1,7 +1,6 @@
 # Web Analyzer App
 ![Go Version](https://img.shields.io/badge/Go-1.23%2B-00ADD8?logo=go)
 ![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?logo=docker)
-![License](https://img.shields.io/github/license/nadeeshandevon/web-analyzer-app)
 ![Last Commit](https://img.shields.io/github/last-commit/nadeeshandevon/web-analyzer-app)
 ![Prometheus](https://img.shields.io/badge/Prometheus-Metrics-E6522C?logo=prometheus)
 ![Nginx](https://img.shields.io/badge/Nginx-Reverse%20Proxy-009639?logo=nginx)
@@ -20,6 +19,14 @@ A web and API-based tool for analyzing the structure, metadata, accessibility, a
 - **Deployment**: Docker-based setup with Nginx reverse proxy support.
 - **Security**: API key authentication for API requests from the frontend/external apps.
 
+## Screenshots
+
+### Web Interface
+![Web Analyzer UI](docs/Screenshot1.png)
+
+### Analysis Results
+![Analysis Results](docs/Screenshot2.png)
+
 ## Project Overview
 
 The Web Analyzer consists of:
@@ -35,13 +42,13 @@ The system is designed to be scalable, observable, and easy to deploy.
 
 The frontend communicates with the backend API through an Nginx reverse proxy, simplifying CORS handling and enabling flexible deployments.
 
-![High-Level Architecture](HighlevelArchitecture.png)
+![High-Level Architecture](docs/HighlevelArchitecture.png)
 
 ### Backend Architecture
 
 The backend follows a layered architecture with a concurrent worker pool for analysis.
 
-![Backend Architecture](Architecture.png)
+![Backend Architecture](docs/Architecture.png)
 
 ### Component Responsibilities
 
