@@ -12,13 +12,8 @@ The Web Analyzer consists of a **Go-based REST API** and a **responsive web fron
 
 The system follows a decoupled client-server architecture where the frontend communicates with the backend through a reverse proxy. This ensures security, simplifies CORS management, and allows for seamless scaling of individual components.
 
-```mermaid
-flowchart LR
-    User(("User")) -- HTTPS --> Proxy["Nginx Proxy"]
-    Proxy -- Serve --> FE["Frontend Assets : HTML/JS/CSS"]
-    Proxy -- HTTP API Calls --> BE["Go API Server"]
-    BE -- Analyze --> Internet(("Target Website"))
-```
+![High-Level Architecture](Architecture.png)
+
 
 ### Backend Architecture
 
@@ -223,8 +218,8 @@ For robust local testing and development, the API was verified using the **Postm
 The backend API is equipped with a comprehensive suite of unit tests to ensure reliability and maintainability. We prioritize high coverage for core business logic, middleware, and utility functions.
 
 #### Current Coverage Status
-The overall statement coverage for the `app` package is currently **71.3%**.
-![Coverage](image.png)
+The overall statement coverage for the `app` package is currently **74.8%**.
+![Coverage](coverage.png)
 
 #### How to Run Tests
 To execute the tests and generate a coverage report, run the following commands in the `web-analyzer-app` root directory:
