@@ -35,11 +35,18 @@ The Web Analyzer consists of:
 3.  **Dockerized Infrastructure**: Environment-agnostic deployment with monitoring.
 
 The system is designed to be scalable, observable, and easy to deploy.
+The Web Analyzer consists of:
+1.  **Go-based REST API**: Performs core analysis and orchestrates workers.
+2.  **Responsive Web Frontend**: Served via Nginx for a clean user interface.
+3.  **Dockerized Infrastructure**: Environment-agnostic deployment with monitoring.
+
+The system is designed to be scalable, observable, and easy to deploy.
 
 ## Architecture
 
 ### High-Level Architecture
 
+The frontend communicates with the backend API through an Nginx reverse proxy, simplifying CORS handling and enabling flexible deployments.
 The frontend communicates with the backend API through an Nginx reverse proxy, simplifying CORS handling and enabling flexible deployments.
 
 ![High-Level Architecture](docs/HighlevelArchitecture.png)
@@ -47,11 +54,20 @@ The frontend communicates with the backend API through an Nginx reverse proxy, s
 ### Backend Architecture
 
 The backend follows a layered architecture with a concurrent worker pool for analysis.
+The backend follows a layered architecture with a concurrent worker pool for analysis.
 
 ![Backend Architecture](docs/Architecture.png)
 
 ### Component Responsibilities
+### Component Responsibilities
 
+- **Gin Router**: Entry point for all API requests; handles routing.
+- **Middleware**: Manages API key authentication, Prometheus metrics, pprof profiling, and CORS.
+- **API Controllers / Handlers**: Validates requests, invokes service logic, and serializes responses.
+- **Web Analyze Service**: Orchestrates the workflow, coordinating parsing, state management, and link checking.
+- **Repository Layer**: Provides in-memory storage (proposing migrate to MongoDB/PostgreSQL).
+- **HTML Helper**: Parses HTML using `golang.org/x/net/html` to extract metadata and forms.
+- **Worker Pool**: Concurrently validates link accessibility and reports HTTP status codes.
 - **Gin Router**: Entry point for all API requests; handles routing.
 - **Middleware**: Manages API key authentication, Prometheus metrics, pprof profiling, and CORS.
 - **API Controllers / Handlers**: Validates requests, invokes service logic, and serializes responses.
@@ -71,6 +87,17 @@ The backend follows a layered architecture with a concurrent worker pool for ana
 
 > [!NOTE]
 > All API requests require an API key: `x-api-key: dev-key-123`.
+## Key URLs
+
+| Service | URL |
+| :--- | :--- |
+| **Frontend** | [http://localhost:8080](http://localhost:8080) |
+| **API Base** | [http://localhost:8081/api/v1](http://localhost:8081/api/v1) |
+| **Prometheus Metrics** | [http://localhost:9090/metrics](http://localhost:9090/metrics) |
+| **pprof Profiling** | [http://localhost:9090/debug/pprof/](http://localhost:9090/debug/pprof/) |
+
+> [!NOTE]
+> All API requests require an API key: `x-api-key: dev-key-123`.
 
 ## API Reference
 
@@ -78,13 +105,19 @@ The backend follows a layered architecture with a concurrent worker pool for ana
 Starts a background analysis for a given URL.
 
 **Endpoint:** `POST /api/v1/web-analyzer/analyze`
+Starts a background analysis for a given URL.
 
+**Endpoint:** `POST /api/v1/web-analyzer/analyze`
+
+**Request Body:**
 **Request Body:**
 ```json
 {
   "url": "https://www.test-app.com"
 }
 ```
+
+**Response:**
 
 **Response:**
 ```json
@@ -97,7 +130,11 @@ Starts a background analysis for a given URL.
 Retrieves analysis status and detailed results.
 
 **Endpoint:** `GET /api/v1/web-analyzer/:analyze_id/analyze`
+Retrieves analysis status and detailed results.
 
+**Endpoint:** `GET /api/v1/web-analyzer/:analyze_id/analyze`
+
+**Success Response:**
 **Success Response:**
 ```json
 {
@@ -105,11 +142,13 @@ Retrieves analysis status and detailed results.
   "html_version": "HTML5",
   "title": "Test App",
   "headings": { "h1": 1, "h2": 0 },
+  "headings": { "h1": 1, "h2": 0 },
   "links": {
     "internal": 12,
     "external": 5,
     "inaccessible": 1,
     "inaccessible_details": [
+      { "url": "https://invalid-link.com", "status_code": 404 }
       { "url": "https://invalid-link.com", "status_code": 404 }
     ]
   },
@@ -120,16 +159,26 @@ Retrieves analysis status and detailed results.
 ```
 
 ---
+---
 
 ## Technology Stack
 
 ### Backend
+### Backend
 - **Language**: [Go 1.23+](https://go.dev/)
+- **Framework**: [Gin Gonic](https://gin-gonic.com/)
 - **Framework**: [Gin Gonic](https://gin-gonic.com/)
 - **Monitoring**: [Prometheus](https://prometheus.io/)
 - **Profiling**: [pprof](https://pkg.go.dev/net/http/pprof)
 - **Parsing**: `golang.org/x/net/html`
+- **Parsing**: `golang.org/x/net/html`
 
+### Frontend
+- **Framework**: Vanilla JavaScript + jQuery
+- **Styling**: Bootstrap 5
+- **Web Server**: Nginx
+
+---
 ### Frontend
 - **Framework**: Vanilla JavaScript + jQuery
 - **Styling**: Bootstrap 5
@@ -152,8 +201,22 @@ docker-compose up --build -d
 ```
 
 Access the app at: **[http://localhost:8080](http://localhost:8080)**
+### Option 1: Docker
+```bash
+git clone https://github.com/nadeeshandevon/web-analyzer-app.git
+cd web-analyzer-app
+docker-compose up --build -d
+```
+If required to redeploy the application, run the following command:
+```bash
+docker-compose down
+docker-compose up --build -d
+```
+
+Access the app at: **[http://localhost:8080](http://localhost:8080)**
 
 ### Option 2: Local Development
+**Run API:**
 **Run API:**
 ```bash
 cd web-analyzer-api
@@ -170,15 +233,32 @@ const API_KEY = 'dev-key-123';
 ## Testing & Coverage
 
 ### Current Coverage Status
+**Run Frontend:**
+Open `web-analyzer-web/index.html` in your browser. Ensure `app.js` is configured correctly for local API access as below.
+```javascript
+const API_BASE_URL = 'http://localhost:8081/api/v1/web-analyzer';
+const API_KEY = 'dev-key-123';
+```
+---
+
+## Testing & Coverage
+
+### Current Coverage Status
 The overall statement coverage for the `app` package is currently **74.8%**.
+
+![Coverage Summary](coverage.png)
 
 ![Coverage Summary](coverage.png)
 
 #### Interactive Report
 HTML coverage report is available: [coverage.html](coverage.html).
+#### Interactive Report
+HTML coverage report is available: [coverage.html](coverage.html).
 
 ### How to Run Tests
+### How to Run Tests
 ```bash
+cd web-analyzer-api
 cd web-analyzer-api
 go test ./app/... -coverprofile=coverage.out
 go tool cover -func=coverage.out
@@ -190,9 +270,22 @@ go tool cover -func=coverage.out
 
 - **Container Networking**: Solved frontend-to-backend communication issues using an Nginx reverse proxy, enabling relative API paths and eliminating CORS issues.
 - **Performance**: Implemented a goroutine-based worker pool to asynchronously validate links.
+---
+
+## Challenges & Solutions
+
+- **Container Networking**: Solved frontend-to-backend communication issues using an Nginx reverse proxy, enabling relative API paths and eliminating CORS issues.
+- **Performance**: Implemented a goroutine-based worker pool to asynchronously validate links.
 
 ## Possible Improvements
 
+- [ ] Persistent database storage (PostgreSQL/MongoDB).
+- [ ] Advanced Prometheus metrics + Grafana dashboards and apply metric.
+- [ ] Frontend migration to React/Vue.
+- [ ] JWT-based authentication.
+- [ ] CI/CD continuous delivery pipeline.
+- [ ] API Rate limiting.
+- [ ] WebSocket-based real-time updates.
 - [ ] Persistent database storage (PostgreSQL/MongoDB).
 - [ ] Advanced Prometheus metrics + Grafana dashboards and apply metric.
 - [ ] Frontend migration to React/Vue.
