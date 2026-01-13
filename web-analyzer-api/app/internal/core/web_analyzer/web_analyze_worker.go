@@ -14,7 +14,8 @@ import (
 )
 
 type linkChecker struct {
-	log *logger.Logger
+	log         *logger.Logger
+	invalidURLs sync.Map
 }
 
 func NewLinkChecker(log *logger.Logger) core.LinkChecker {
@@ -71,6 +72,15 @@ func (lc *linkChecker) CheckLink(ctx context.Context, client *http.Client, link 
 		absoluteURL = baseURL.ResolveReference(parsedLink).String()
 	}
 
+	if val, ok := lc.invalidURLs.Load(absoluteURL); ok {
+		lc.log.Debug("Skipping invalid link (cached): " + absoluteURL)
+		return &model.LinkCheckResult{
+			URL:          absoluteURL,
+			StatusCode:   val.(int),
+			IsAccessible: false,
+		}
+	}
+
 	req, err := http.NewRequestWithContext(ctx, "HEAD", absoluteURL, nil)
 	if err != nil {
 		lc.log.Warn("Invalid link: " + link)
@@ -94,6 +104,8 @@ func (lc *linkChecker) CheckLink(ctx context.Context, client *http.Client, link 
 		resp, err = client.Do(req)
 		if err != nil {
 			lc.log.Debug("Inaccessible link (GET failed): " + absoluteURL)
+			lc.invalidURLs.Store(absoluteURL, 0)
+
 			return &model.LinkCheckResult{
 				URL:          absoluteURL,
 				StatusCode:   0,
@@ -105,6 +117,7 @@ func (lc *linkChecker) CheckLink(ctx context.Context, client *http.Client, link 
 
 	if resp.StatusCode >= 400 {
 		lc.log.Debug("Inaccessible link: " + link + " with status code: " + strconv.Itoa(resp.StatusCode))
+		lc.invalidURLs.Store(absoluteURL, resp.StatusCode)
 		return &model.LinkCheckResult{
 			URL:          absoluteURL,
 			StatusCode:   resp.StatusCode,
